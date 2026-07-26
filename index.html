@@ -125,8 +125,7 @@ document.getElementById("chat").style.display="block";
 
 }
 
-
-function sendMessage(){
+async function sendMessage(){
 
 let text = document.getElementById("message").value;
 
@@ -134,13 +133,19 @@ if(text==""){
 return;
 }
 
-document.getElementById("messages").innerHTML +=
-
-"<div class='message'><b>"+username+"</b>: "+text+"</div>";
+await supabaseClient
+.from("messages")
+.insert([
+  {
+    username: username,
+    message: text
+  }
+]);
 
 document.getElementById("message").value="";
 
 }
+
 
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
