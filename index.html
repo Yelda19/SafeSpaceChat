@@ -1,12 +1,146 @@
-
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <title>SafeSpaceChat</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>🌿🌊 SafeSpaceChat</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #071a16;
+  color: white;
+}
+
+.container {
+  max-width: 500px;
+  margin: 40px auto;
+  padding: 20px;
+}
+
+h1 {
+  text-align: center;
+  color: #55c9a5;
+}
+
+.box {
+  background: #102b27;
+  padding: 20px;
+  border-radius: 20px;
+}
+
+input {
+  width: 90%;
+  padding: 12px;
+  border-radius: 15px;
+  border: none;
+  margin-top: 10px;
+}
+
+button {
+  width: 100%;
+  margin-top: 15px;
+  padding: 12px;
+  border: none;
+  border-radius: 15px;
+  background: #1d8cff;
+  color: white;
+  font-size: 16px;
+}
+
+#chat {
+  display: none;
+}
+
+.message {
+  background: #16463d;
+  padding: 10px;
+  border-radius: 15px;
+  margin: 10px 0;
+}
+</style>
+
 </head>
+
 <body>
-  <h1>Willkommen bei SafeSpaceChat 💜</h1>
-  <p>Dies ist meine erste Webseite.</p>
+
+<div class="container">
+
+<h1>🌿🌊 SafeSpaceChat</h1>
+
+<div class="box" id="login">
+
+<p>Wie möchtest du heißen?</p>
+
+<input id="username" placeholder="Dein anonymer Name">
+
+<button onclick="joinChat()">
+Chat betreten
+</button>
+
+</div>
+
+
+<div class="box" id="chat">
+
+<div id="messages">
+
+<div class="message">
+Willkommen im SafeSpaceChat 🌿
+</div>
+
+</div>
+
+<input id="message" placeholder="Nachricht schreiben...">
+
+<button onclick="sendMessage()">
+Senden
+</button>
+
+</div>
+
+</div>
+
+
+<script>
+
+let username = "";
+
+function joinChat(){
+
+username = document.getElementById("username").value;
+
+if(username == ""){
+alert("Bitte Namen eingeben");
+return;
+}
+
+document.getElementById("login").style.display="none";
+document.getElementById("chat").style.display="block";
+
+}
+
+
+function sendMessage(){
+
+let text = document.getElementById("message").value;
+
+if(text==""){
+return;
+}
+
+document.getElementById("messages").innerHTML +=
+
+"<div class='message'><b>"+username+"</b>: "+text+"</div>";
+
+document.getElementById("message").value="";
+
+}
+
+</script>
+
+
 </body>
 </html>
