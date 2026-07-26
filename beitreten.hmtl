@@ -1,36 +1,32 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="UTF-8">
-<title>Safe Space betreten</title>
+    <meta charset="UTF-8">
+    <title>Safe Space - Beitreten</title>
 </head>
-
 <body>
 
-<h1>Willkommen im Safe Space</h1>
+    <h1>Willkommen im Safe Space Chat</h1>
+    <p>Bitte gib deinen Namen ein, um dem Chat beizutreten:</p>
 
-<p>Gib einen Namen ein, mit dem du im Chat erscheinen möchtest.</p>
+    <input id="nameInput" placeholder="Dein Name...">
+    <button onclick="saveName()">Beitreten</button>
 
-<input id="username" placeholder="Dein Name">
+    <script>
+    function saveName() {
+        let eingabe = document.getElementById("nameInput").value;
 
-<button onclick="beitreten()">
-Gruppe betreten
-</button>
+        if (eingabe.trim() === "") {
+            alert("Bitte gib einen gültigen Namen ein!");
+            return;
+        }
 
-<script>
-function beitreten() {
-    let name = document.getElementById("username").value;
-
-    if(name.trim() === "") {
-        alert("Bitte gib einen Namen ein.");
-        return;
+        localStorage.setItem("chatName", eingabe.trim());
+        
+        // Leitet den Nutzer zur Hauptseite weiter
+        window.location.href = "index.html"; 
     }
-
-    localStorage.setItem("chatName", name);
-
-    window.location.href = "chat.html";
-}
-</script>
+    </script>
 
 </body>
 </html>
