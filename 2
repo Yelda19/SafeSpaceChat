@@ -1,1 +1,36 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Safe Space betreten</title>
+</head>
 
+<body>
+
+<h1>Willkommen im Safe Space</h1>
+
+<p>Gib einen Namen ein, mit dem du im Chat erscheinen möchtest.</p>
+
+<input id="username" placeholder="Dein Name">
+
+<button onclick="beitreten()">
+Gruppe betreten
+</button>
+
+<script>
+function beitreten() {
+    let name = document.getElementById("username").value;
+
+    if(name.trim() === "") {
+        alert("Bitte gib einen Namen ein.");
+        return;
+    }
+
+    localStorage.setItem("chatName", name);
+
+    window.location.href = "chat.html";
+}
+</script>
+
+</body>
+</html>
