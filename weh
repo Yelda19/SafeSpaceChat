@@ -1,23 +1,76 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="UTF-8">
-<title>Safe Space</title>
+    <meta charset="UTF-8">
+    <title>Safe Space Chat</title>
+    <script src="https://jsdelivr.net"></script>
 </head>
-
 <body>
 
-<h1>Willkommen im Safe Space</h1>
+    <h1>TEST CHAT MAUSI</h1>
+    <p id="user"></p>
 
-<p>
-Ein anonymer Gruppenraum zum Austauschen, Reden und Zuhören.
-</p>
+    <div id="messages"></div>
 
-<a href="beitreten.html">
-<button>
-Gruppe besuchen
-</button>
-</a>
+    <input id="message" placeholder="Schreibe etwas...">
+    <button onclick="sendMessage()">Senden</button>
+
+    <script>
+    const SUPABASE_URL = "https://supabase.co";
+    const SUPABASE_KEY = "sb_publishable_tcVqcq5vuHjplh3Qf7m5FA_P-Z3xy03";
+
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let name = localStorage.getItem("chatName");
+
+    // Falls kein Name im Browser gespeichert ist -> Weiterleitung zur Beitrittsseite
+    if (!name) {
+        window.location.href = "beitreten.html";
+    }
+
+    document.getElementById("user").innerHTML = "Du bist angemeldet als: " + name;
+
+    async function sendMessage() {
+        let text = document.getElementById("message").value;
+        if (text.trim() === "") return;
+
+        await supabase
+            .from("messages")
+            .insert([{ username: name, message: text }]);
+
+        document.getElementById("message").value = "";
+    }
+
+    async function loadMessages() {
+        const { data, error } = await supabase
+            .from("messages")
+            .select("*")
+            .order("id", { ascending: true });
+
+        if (error) {
+            console.error("Fehler beim Laden:", error);
+            return;
+        }
+
+        const messagesDiv = document.getElementById("messages");
+        messagesDiv.innerHTML = "";
+        
+        data.forEach(msg => {
+            messagesDiv.innerHTML += `<p><strong>${msg.username}:</strong> ${msg.message}</p>`;
+        });
+    }
+
+    // Live-Updates empfangen
+    supabase
+        .channel('public:messages')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, (payload) => {
+            const messagesDiv = document.getElementById("messages");
+            messagesDiv.innerHTML += `<p><strong>${payload.new.username}:</strong> ${payload.new.message}</p>`;
+        })
+        .subscribe();
+
+    loadMessages();
+    </script>
 
 </body>
 </html>
