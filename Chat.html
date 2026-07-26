@@ -1,10 +1,14 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
 <meta charset="UTF-8">
 <title>Safe Space Chat</title>
-</head>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+</head>
+
 <body>
 
 <h1>Safe Space Gruppenchat</h1>
@@ -20,27 +24,25 @@
 Senden
 </button>
 
+
+<script>
+
 const SUPABASE_URL = "https://oqcepyftwjaxhvpdxymc.supabase.co";
-const SUPABASE_KEY = "sb_publishable_tcVqcq5vuHjplh3Qf7m5FA_P-Z3xy03";
+const SUPABASE_KEY = "DEIN_ANON_KEY_HIER";
 
 const supabase = window.supabase.createClient(
     SUPABASE_URL,
     SUPABASE_KEY
 );
-<script>
+
 
 let name = localStorage.getItem("chatName");
 
-
-const supabaseClient = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-);
-let name = localStorage.getItem("chatName");
 
 if(!name){
     window.location.href = "beitreten.html";
 }
+
 
 document.getElementById("user").innerHTML =
 "Du bist angemeldet als: " + name;
