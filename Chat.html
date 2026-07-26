@@ -48,7 +48,7 @@ document.getElementById("user").innerHTML =
 "Du bist angemeldet als: " + name;
 
 
-function sendMessage(){
+async function sendMessage(){
 
     let text = document.getElementById("message").value;
 
@@ -56,14 +56,14 @@ function sendMessage(){
         return;
     }
 
-    let messageBox = document.getElementById("messages");
-
-    let newMessage = document.createElement("p");
-
-    newMessage.innerHTML =
-    "<b>" + name + ":</b> " + text;
-
-    messageBox.appendChild(newMessage);
+    await supabase
+    .from("messages")
+    .insert([
+        {
+            username: name,
+            message: text
+        }
+    ]);
 
     document.getElementById("message").value = "";
 
