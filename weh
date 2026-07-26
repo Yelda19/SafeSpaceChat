@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Safe Space</title>
+</head>
+
+<body>
+
+<h1>Willkommen im Safe Space</h1>
+
+<p>
+Ein anonymer Gruppenraum zum Austauschen, Reden und Zuhören.
+</p>
+
+<a href="beitreten.html">
+<button>
+Gruppe besuchen
+</button>
+</a>
+
+</body>
+</html>
