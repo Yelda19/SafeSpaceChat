@@ -3,43 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <title>Safe Space Chat</title>
+    <!-- Offizielle Supabase-Bibliothek -->
     <script src="https://jsdelivr.net"></script>
     <style>
-        /* Blendet Bereiche aus, die gerade nicht gebraucht werden */
+        body { font-family: sans-serif; padding: 20px; background: #f4f4f9; }
         .hidden { display: none !important; }
+        #messages { border: 1px solid #ccc; background: white; padding: 10px; height: 300px; overflow-y: scroll; margin-bottom: 10px; }
+        .error-log { color: red; background: #ffdada; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid red; }
     </style>
 </head>
 <body>
 
-    <!-- BEREICH 1: ANMELDUNG (Wird zuerst angezeigt) -->
+    <!-- Fehler-Anzeige für den Browser-Bildschirm -->
+    <div id="statusMonitor" class="error-log hidden"></div>
+
+    <!-- BEREICH 1: ANMELDUNG -->
     <div id="loginArea">
         <h1>Willkommen im Safe Space Chat</h1>
         <p>Bitte gib deinen Namen ein, um dem Chat beizutreten:</p>
         <input id="nameInput" placeholder="Dein Name...">
-        <button onclick="saveName()">Beitreten</button>
+        <button id="joinBtn" onclick="saveName()">Beitreten</button>
     </div>
 
-    <!-- BEREICH 2: CHAT (Wird erst nach Namenseingabe sichtbar) -->
+    <!-- BEREICH 2: CHAT -->
     <div id="chatArea" class="hidden">
         <h1>TEST CHAT MAUSI</h1>
         <p id="user"></p>
         <div id="messages"></div>
         <input id="message" placeholder="Schreibe etwas...">
         <button onclick="sendMessage()">Senden</button>
+        <button onclick="logout()" style="background:#ccc; margin-left:10px;">Name wechseln</button>
     </div>
 
     <script>
-    const SUPABASE_URL = "https://supabase.co";
+    // System-Logs direkt auf dem Bildschirm anzeigen
+    function showError(text) {
+        const monitor = document.getElementById("statusMonitor");
+        monitor.classList.remove("hidden");
+        monitor.innerHTML = "<strong>System-Fehler:</strong> " + text;
+    }
+
+    const SUPABASE_URL = "https://oqcepyftwjaxhvpdxymc.supabase.co";
     const SUPABASE_KEY = "sb_publishable_tcVqcq5vuHjplh3Qf7m5FA_P-Z3xy03";
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    
+    let supabase;
+    try {
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    } catch(e) {
+        showError("Supabase konnte nicht geladen werden. Prüfe deine Internetverbindung.");
+    }
 
     let currentName = localStorage.getItem("chatName");
 
-    // Funktion zum Einloggen
     function saveName() {
         let eingabe = document.getElementById("nameInput").value;
         if (eingabe.trim() === "") {
-            alert("Bitte gib einen gültigen Namen ein!");
+            alert("Bitte gib einen Namen ein!");
             return;
         }
         localStorage.setItem("chatName", eingabe.trim());
@@ -47,27 +66,34 @@
         startChatSession();
     }
 
-    // Schaltet die Ansicht von Login auf Chat um
+    function logout() {
+        localStorage.removeItem("chatName");
+        location.reload();
+    }
+
     function startChatSession() {
         document.getElementById("loginArea").classList.add("hidden");
         document.getElementById("chatArea").classList.remove("hidden");
-        document.getElementById("user").innerHTML = "Du bist angemeldet als: " + currentName;
+        document.getElementById("user").innerHTML = "Du bist angemeldet als: <b>" + currentName + "</b>";
         loadMessages();
+        initRealtime();
     }
 
-    // Nachrichten senden
     async function sendMessage() {
         let text = document.getElementById("message").value;
         if (text.trim() === "") return;
 
-        await supabase
+        const { error } = await supabase
             .from("messages")
             .insert([{ username: currentName, message: text }]);
 
-        document.getElementById("message").value = "";
+        if (error) {
+            showError("Senden fehlgeschlagen! Grund: " + error.message + " (Prüfe die RLS-Richtlinien im Supabase-Dashboard!)");
+        } else {
+            document.getElementById("message").value = "";
+        }
     }
 
-    // Nachrichten laden
     async function loadMessages() {
         const { data, error } = await supabase
             .from("messages")
@@ -75,7 +101,7 @@
             .order("id", { ascending: true });
 
         if (error) {
-            console.error("Fehler beim Laden:", error);
+            showError("Laden fehlgeschlagen! Grund: " + error.message);
             return;
         }
 
@@ -85,18 +111,25 @@
         data.forEach(msg => {
             messagesDiv.innerHTML += `<p><strong>${msg.username}:</strong> ${msg.message}</p>`;
         });
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
     }
 
-    // Live-Updates empfangen
-    supabase
-        .channel('public:messages')
-        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, (payload) => {
-            const messagesDiv = document.getElementById("messages");
-            messagesDiv.innerHTML += `<p><strong>${payload.new.username}:</strong> ${payload.new.message}</p>`;
-        })
-        .subscribe();
+    function initRealtime() {
+        supabase
+            .channel('public:messages')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, (payload) => {
+                const messagesDiv = document.getElementById("messages");
+                messagesDiv.innerHTML += `<p><strong>${payload.new.username}:</strong> ${payload.new.message}</p>`;
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            })
+            .subscribe((status) => {
+                if (status === "CHANNEL_ERROR") {
+                    console.log("Realtime konnte nicht gestartet werden. Das ist normal, falls Realtime im Dashboard deaktiviert ist.");
+                }
+            });
+    }
 
-    // Beim Laden der Seite prüfen, ob bereits ein Name existiert
+    // Beim Start prüfen
     if (currentName) {
         startChatSession();
     }
@@ -104,3 +137,4 @@
 
 </body>
 </html>
+
