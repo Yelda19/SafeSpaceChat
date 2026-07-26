@@ -23,7 +23,13 @@ Senden
 https://oqcepyftwjaxhvpdxymc.supabase.co
 sb_publishable_tcVqcq5vuHjplh3Qf7m5FA_P-Z3xy03
 <script>
+const SUPABASE_URL = https://oqcepyftwjaxhvpdxymc.supabase.co
+const SUPABASE_KEY = sb_publishable_tcVqcq5vuHjplh3Qf7m5FA_P-Z3xy03
 
+const supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
 let name = localStorage.getItem("chatName");
 
 if(!name){
