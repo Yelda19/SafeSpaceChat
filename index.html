@@ -171,24 +171,7 @@ document.getElementById("messages").innerHTML +=
 });
 
 }
-async function loadMessages(){
-
-
-let { data } = await supabaseClient
-.from("messages")
-.select("*")
-.order("created_at", { ascending: true });
-
-document.getElementById("messages").innerHTML = "";
-
-data.forEach(msg => {
-
-document.getElementById("messages").innerHTML +=
-"<div class='message'><b>"+msg.username+"</b>: "+msg.message+"</div>";
-
-});
-
-}  
+ 
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
