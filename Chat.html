@@ -1,1 +1,60 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Safe Space Chat</title>
+</head>
 
+<body>
+
+<h1>Safe Space Gruppenchat</h1>
+
+<p id="user"></p>
+
+<div id="messages">
+</div>
+
+<input id="message" placeholder="Schreibe etwas...">
+
+<button onclick="sendMessage()">
+Senden
+</button>
+
+
+<script>
+
+let name = localStorage.getItem("chatName");
+
+if(!name){
+    window.location.href = "beitreten.html";
+}
+
+document.getElementById("user").innerHTML =
+"Du bist angemeldet als: " + name;
+
+
+function sendMessage(){
+
+    let text = document.getElementById("message").value;
+
+    if(text.trim() === ""){
+        return;
+    }
+
+    let messageBox = document.getElementById("messages");
+
+    let newMessage = document.createElement("p");
+
+    newMessage.innerHTML =
+    "<b>" + name + ":</b> " + text;
+
+    messageBox.appendChild(newMessage);
+
+    document.getElementById("message").value = "";
+
+}
+
+</script>
+
+</body>
+</html>
