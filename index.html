@@ -1,179 +1,106 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>🌿🌊 SafeSpaceChat</title>
-
-<style>
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #071a16;
-  color: white;
-}
-
-.container {
-  max-width: 500px;
-  margin: 40px auto;
-  padding: 20px;
-}
-
-h1 {
-  text-align: center;
-  color: #55c9a5;
-}
-
-.box {
-  background: #102b27;
-  padding: 20px;
-  border-radius: 20px;
-}
-
-input {
-  width: 90%;
-  padding: 12px;
-  border-radius: 15px;
-  border: none;
-  margin-top: 10px;
-}
-
-button {
-  width: 100%;
-  margin-top: 15px;
-  padding: 12px;
-  border: none;
-  border-radius: 15px;
-  background: #1d8cff;
-  color: white;
-  font-size: 16px;
-}
-
-#chat {
-  display: none;
-}
-
-.message {
-  background: #16463d;
-  padding: 10px;
-  border-radius: 15px;
-  margin: 10px 0;
-}
-</style>
-
+    <meta charset="UTF-8">
+    <title>Safe Space Chat</title>
+    <script src="https://jsdelivr.net"></script>
+    <style>
+        /* Blendet Bereiche aus, die gerade nicht gebraucht werden */
+        .hidden { display: none !important; }
+    </style>
 </head>
-
 <body>
 
-<div class="container">
+    <!-- BEREICH 1: ANMELDUNG (Wird zuerst angezeigt) -->
+    <div id="loginArea">
+        <h1>Willkommen im Safe Space Chat</h1>
+        <p>Bitte gib deinen Namen ein, um dem Chat beizutreten:</p>
+        <input id="nameInput" placeholder="Dein Name...">
+        <button onclick="saveName()">Beitreten</button>
+    </div>
 
-<h1>🌿🌊 SafeSpaceChat</h1>
+    <!-- BEREICH 2: CHAT (Wird erst nach Namenseingabe sichtbar) -->
+    <div id="chatArea" class="hidden">
+        <h1>TEST CHAT MAUSI</h1>
+        <p id="user"></p>
+        <div id="messages"></div>
+        <input id="message" placeholder="Schreibe etwas...">
+        <button onclick="sendMessage()">Senden</button>
+    </div>
 
-<div class="box" id="login">
+    <script>
+    const SUPABASE_URL = "https://supabase.co";
+    const SUPABASE_KEY = "sb_publishable_tcVqcq5vuHjplh3Qf7m5FA_P-Z3xy03";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-<p>Wie möchtest du heißen?</p>
+    let currentName = localStorage.getItem("chatName");
 
-<input id="username" placeholder="Dein anonymer Name">
+    // Funktion zum Einloggen
+    function saveName() {
+        let eingabe = document.getElementById("nameInput").value;
+        if (eingabe.trim() === "") {
+            alert("Bitte gib einen gültigen Namen ein!");
+            return;
+        }
+        localStorage.setItem("chatName", eingabe.trim());
+        currentName = eingabe.trim();
+        startChatSession();
+    }
 
-<button onclick="joinChat()">
-Chat betreten
-</button>
-<div id="chatbox" style="display:none;">
+    // Schaltet die Ansicht von Login auf Chat um
+    function startChatSession() {
+        document.getElementById("loginArea").classList.add("hidden");
+        document.getElementById("chatArea").classList.remove("hidden");
+        document.getElementById("user").innerHTML = "Du bist angemeldet als: " + currentName;
+        loadMessages();
+    }
 
-<div id="messages"></div>
+    // Nachrichten senden
+    async function sendMessage() {
+        let text = document.getElementById("message").value;
+        if (text.trim() === "") return;
 
-<input id="message" placeholder="Nachricht">
+        await supabase
+            .from("messages")
+            .insert([{ username: currentName, message: text }]);
 
-<button onclick="sendMessage()">
-Senden
-</button>
+        document.getElementById("message").value = "";
+    }
 
-</div>
-</div>
+    // Nachrichten laden
+    async function loadMessages() {
+        const { data, error } = await supabase
+            .from("messages")
+            .select("*")
+            .order("id", { ascending: true });
 
+        if (error) {
+            console.error("Fehler beim Laden:", error);
+            return;
+        }
 
-<div class="box" id="chat">
+        const messagesDiv = document.getElementById("messages");
+        messagesDiv.innerHTML = "";
+        
+        data.forEach(msg => {
+            messagesDiv.innerHTML += `<p><strong>${msg.username}:</strong> ${msg.message}</p>`;
+        });
+    }
 
-<div id="messages">
+    // Live-Updates empfangen
+    supabase
+        .channel('public:messages')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, (payload) => {
+            const messagesDiv = document.getElementById("messages");
+            messagesDiv.innerHTML += `<p><strong>${payload.new.username}:</strong> ${payload.new.message}</p>`;
+        })
+        .subscribe();
 
-<div class="message">
-Willkommen im SafeSpaceChat 🌿
-</div>
-
-</div>
-
-<input id="message" placeholder="Nachricht schreiben...">
-
-<button onclick="sendMessage()">
-Senden
-</button>
-
-</div>
-
-</div>
-
-
-<script>
-
-
-
-let username = "";
-
-function joinChat(){
-alert("Button funktioniert");
-username = document.getElementById("username").value;
-
-if(username == ""){
-alert("Bitte Namen eingeben");
-return;
-}
-
-document.getElementById("login").style.display="none";
-document.getElementById("chatbox").style.display="block";
-loadMessages();
-}
-
-async function sendMessage(){
-
-let text = document.getElementById("message").value;
-
-if(text==""){
-return;
-}
-
-await supabaseClient
-.from("messages")
-.insert([
-  {
-    username: username,
-    message: text
-  }
-]);
-
-document.getElementById("message").value="";
-
-}
-async function loadMessages(){
-
-let { data } = await supabaseClient
-.from("messages")
-.select("*")
-.order("created_at", { ascending: true });
-
-document.getElementById("messages").innerHTML = "";
-
-data.forEach(msg => {
-
-document.getElementById("messages").innerHTML +=
-"<div class='message'><b>"+msg.username+"</b>: "+msg.message+"</div>";
-
-});
-
-}
- 
-</script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    // Beim Laden der Seite prüfen, ob bereits ein Name existiert
+    if (currentName) {
+        startChatSession();
+    }
+    </script>
 
 </body>
 </html>
