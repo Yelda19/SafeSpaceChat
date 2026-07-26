@@ -68,57 +68,6 @@ async function sendMessage(){
     document.getElementById("message").value = "";
 
 }
-async function loadMessages(){
-
-    let { data } = await supabase
-    .from("messages")
-    .select("*")
-    .order("created_at", { ascending: true });
-
-
-    let messageBox = document.getElementById("messages");
-
-    messageBox.innerHTML = "";
-
-
-    data.forEach(msg => {
-
-        let newMessage = document.createElement("p");
-
-        newMessage.innerHTML =
-        "<b>" + msg.username + ":</b> " + msg.message;
-
-        messageBox.appendChild(newMessage);
-
-    });
-
-}
-async function loadMessages(){
-
-    let { data } = await supabase
-    .from("messages")
-    .select("*")
-    .order("created_at", { ascending: true });
-
-
-    let messageBox = document.getElementById("messages");
-
-    messageBox.innerHTML = "";
-
-
-    data.forEach(msg => {
-
-        let newMessage = document.createElement("p");
-
-        newMessage.innerHTML =
-        "<b>" + msg.username + ":</b> " + msg.message;
-
-        messageBox.appendChild(newMessage);
-
-    });
-
-}
-
 
 loadMessages();
 </script>
